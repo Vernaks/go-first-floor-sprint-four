@@ -62,8 +62,12 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
 	// Проверка входных параметров
-	if weight <= 0 || height <= 0 {
-		return "", fmt.Errorf("weight and height must be positive")
+	if weight <= 0 {
+		return "", fmt.Errorf("weight must be positive")
+	}
+
+	if height <= 0 {
+		return "", fmt.Errorf("height must be positive")
 	}
 
 	steps, trainingType, duration, err := parseTraining(data)
@@ -81,25 +85,24 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 			return "", fmt.Errorf("failed to calculate running calories: %w", err)
 		}
 
-		hours := int(duration.Hours())
-		durationStr := fmt.Sprintf("%dч ", hours)
+		hours := float64(duration.Hours())
+		durationStr := fmt.Sprintf("%0.2f ч.", hours)
 
-		strRun := fmt.Sprintf("Тип тренировки: Бег\nДлительность: %s\nДистанция: %.2f км\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+		strRun := fmt.Sprintf("Тип тренировки: Бег\nДлительность: %s\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 			durationStr, distance(steps, height), meanSpeed(steps, height, duration), runCall)
 
 		return strRun, nil
 
-	case "Ходьба": // Исправлено: с большой буквы
+	case "Ходьба":
 		walkCall, err := WalkingSpentCalories(steps, weight, height, duration)
 		if err != nil {
 			return "", fmt.Errorf("failed to calculate walking calories: %w", err)
 		}
 
-		hours := int(duration.Hours())
-		minutes := int(duration.Minutes()) % 60
-		durationStr := fmt.Sprintf("%dч %dм", hours, minutes)
+		hours := float64(duration.Hours())
+		durationStr := fmt.Sprintf("%0.2f ч.", hours)
 
-		strWalk := fmt.Sprintf("Тип тренировки: Ходьба\nДлительность: %s\nДистанция: %.2f км\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+		strWalk := fmt.Sprintf("Тип тренировки: Ходьба\nДлительность: %s\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 			durationStr, distance(steps, height), meanSpeed(steps, height, duration), walkCall)
 		return strWalk, nil
 
@@ -114,8 +117,12 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 		return 0, fmt.Errorf("Invalid steps")
 	}
 
-	if weight == 0 || height == 0 {
-		return 0, fmt.Errorf("invalid height or weight")
+	if height <= 0 {
+		return 0, fmt.Errorf("invalid height")
+	}
+
+	if weight <= 0 {
+		return 0, fmt.Errorf("invalid weight")
 	}
 
 	if duration <= 0 {
